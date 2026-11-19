@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ENCOR v1.2 — YANG, JSON &amp; RESTCONF API Explorer</title>
+    <script>
+      if (window.self === window.top) {
+        window.location.replace("https://qaswarh.github.io/4any1");
+      }
+    </script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page-layout">
+      <!-- Left Column: Searchable Automation & AI Knowledge Base -->
+      <aside class="glossary-panel">
+        <div class="glossary-search-wrap">
+          <input
+            type="text"
+            id="glossarySearch"
+            class="glossary-search"
+            placeholder="Filter Automation/AI terms (e.g., RESTCONF, YANG, PATCH, AIOps)..."
+          />
+        </div>
+        <div id="glossaryNoResults" class="no-results hidden">
+          No matching terms found.
+        </div>
+
+        <div id="glossaryAuto">
+          <h2>Automation &amp; AI Knowledge Base</h2>
+          <p class="glossary-intro">
+            ENCOR 350-401 v1.2 Domain 6 (Automation &amp; AI — 15%) reference
+            for RESTCONF, NETCONF, YANG, Python, and AIOps.
+          </p>
+
+          <div class="glossary-cat">NETCONF, RESTCONF &amp; YANG</div>
+          <div class="term-card">
+            <h3>NETCONF vs. RESTCONF</h3>
+            <p>
+              <strong>NETCONF:</strong> Runs over
+              <strong>SSH (TCP 830)</strong>, uses
+              <strong>XML</strong> encoding, and supports candidate/running
+              datastores with network-wide commit/rollback.
+              <strong>RESTCONF:</strong> Runs over
+              <strong>HTTPS (TCP 443)</strong>, uses <strong>JSON</strong> or
+              XML (<code>application/yang-data+json</code>), and maps CRUD
+              operations to HTTP verbs.
+            </p>
+          </div>
+          <div class="term-card">
+            <h3>YANG Data Modeling (RFC 7950)</h3>
+            <p>
+              <strong>Yet Another Next Generation</strong> defines the structure
+              and constraints of configuration and operational state data. Types
+              include <strong>IETF</strong> (vendor-neutral standard),
+              <strong>OpenConfig</strong> (operator-driven), and
+              <strong>Native</strong> (Cisco IOS-XE specific).
+            </p>
+          </div>
+          <div class="term-card">
+            <h3>YANG Node Types (Container, List, Leaf, Leaf-List)</h3>
+            <p>
+              <strong>Container:</strong> Groups related child nodes (maps to a
+              JSON object <code>{}</code>, holds no value itself).
+              <strong>List:</strong> Multiple keyed entries (JSON array of
+              objects <code>[{}]</code>). <strong>Leaf:</strong> Single scalar
+              key-value pair. <strong>Leaf-List:</strong> Array of scalar values
+              <code>[]</code>.
+            </p>
+          </div>
+
+          <div class="glossary-cat">HTTP Methods &amp; Status Codes</div>
+          <div class="term-card">
+            <h3>RESTCONF HTTP Verbs (CRUD)</h3>
+            <p>
+              <strong>GET:</strong> Read data (Safe &amp; Idempotent).
+              <strong>POST:</strong> Create a new resource or invoke an RPC (Not
+              idempotent). <strong>PUT:</strong> Create or completely replace a
+              resource (Idempotent). <strong>PATCH:</strong> Partially update
+              existing fields. <strong>DELETE:</strong> Remove a resource.
+            </p>
+          </div>
+          <div class="term-card">
+            <h3>Key HTTP Status Codes</h3>
+            <p>
+              <code>200 OK</code> (GET/PATCH success with body),
+              <code>201 Created</code> (POST/PUT created resource),
+              <code>204 No Content</code> (PUT/PATCH/DELETE success without
+              body), <code>400 Bad Request</code> (malformed JSON/YANG),
+              <code>401 Unauthorized</code> (bad credentials),
+              <code>404 Not Found</code>, <code>405 Method Not Allowed</code>.
+            </p>
+          </div>
+
+          <div class="glossary-cat">
+            Tools, Catalyst Center &amp; AI in Networking
+          </div>
+          <div class="term-card">
+            <h3>Ansible vs. Terraform</h3>
+            <p>
+              <strong>Ansible:</strong> Agentless configuration management tool
+              using <strong>YAML</strong> playbooks over SSH/NETCONF/RESTCONF
+              (procedural/declarative).
+              <strong>Terraform:</strong> Infrastructure-as-Code (IaC)
+              provisioning tool using <strong>HCL</strong> and a state file to
+              manage cloud and SD-WAN/ACI lifecycles.
+            </p>
+          </div>
+          <div class="term-card">
+            <h3>Cisco Catalyst Center (formerly DNA Center) APIs</h3>
+            <p>
+              Intent-based Northbound REST APIs
+              (<code>/dna/intent/api/v1/...</code>) use token authentication
+              (<code>X-Auth-Token</code>) to automate device discovery, PnP
+              provisioning, templates, and Client/Network Health assurance.
+            </p>
+          </div>
+          <div class="term-card">
+            <h3>AI &amp; Machine Learning in Network Operations (v1.2)</h3>
+            <p>
+              <strong>Supervised Learning:</strong> Trains on labeled telemetry
+              to classify traffic or predict hardware failures.
+              <strong>Unsupervised Learning:</strong> Detects anomalous baseline
+              deviations (e.g., sudden latency spikes or DDoS bursts) without
+              prior labels. <strong>Generative AI / AIOps:</strong> Assists with
+              intent translation, root-cause summarization, and automated
+              remediation workflows.
+            </p>
+          </div>
+        </div>
+      </aside>
+      <!-- Right Column: Interactive RESTCONF & YANG Explorer -->
+      <main class="visualizer-column">
+        <div class="net-widget">
+          <div class="sim-header">
+            <div>
+              <h1>RESTCONF API &amp; YANG Data Model Simulator</h1>
+              <p class="sim-sub">
+                Select an API workflow and HTTP verb to inspect live RESTCONF
+                URIs, YANG paths, JSON payloads, and status codes.
+              </p>
+            </div>
+            <select id="apiScenario" class="scenario-select">
+              <option value="int-ip">
+                1. IOS-XE: Configure Loopback10 IPv4 (ietf-interfaces)
+              </option>
+              <option value="int-oper">
+                2. IOS-XE: Read Interface Operational State
+                (ietf-interfaces-state)
+              </option>
+              <option value="bgp-asn">
+                3. IOS-XE Native: Update BGP Router ID (Cisco-IOS-XE-native)
+              </option>
+              <option value="cat-health">
+                4. Cisco Catalyst Center: Query Client Health Assurance
+              </option>
+            </select>
+          </div>
+
+          <!-- HTTP Verb Selector Bar -->
+          <div class="verb-bar" id="verbBar">
+            <button type="button" class="verb-btn verb-get" data-verb="GET">
+              GET
+            </button>
+            <button type="button" class="verb-btn verb-post" data-verb="POST">
+              POST
+            </button>
+            <button type="button" class="verb-btn verb-put" data-verb="PUT">
+              PUT
+            </button>
+            <button
+              type="button"
+              class="verb-btn verb-patch active"
+              data-verb="PATCH"
+            >
+              PATCH
+            </button>
+            <button
+              type="button"
+              class="verb-btn verb-delete"
+              data-verb="DELETE"
+            >
+              DELETE
+            </button>
+          </div>
+
+          <!-- Request & Response Panels -->
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-head">
+                <span>HTTP Request (Client → Device / Controller)</span>
+                <span class="mime-tag">Accept: application/yang-data+json</span>
+              </div>
+              <div class="uri-box" id="reqUri"></div>
+              <div class="sub-label">Request JSON Body:</div>
+              <pre class="code-pre" id="reqBody"></pre>
+            </div>
+
+            <div class="api-card">
+              <div class="api-card-head">
+                <span>HTTP Response</span>
+                <span class="status-badge" id="resStatus">204 No Content</span>
+              </div>
+              <div class="explain-box" id="resExplain"></div>
+              <div class="sub-label">Response JSON Body:</div>
+              <pre class="code-pre" id="resBody"></pre>
+            </div>
+          </div>
+
+          <!-- Interactive YANG Tree Node Explorer -->
+          <div class="yang-section">
+            <div class="yang-head">
+              <span
+                >YANG Model Node Inspector (Click a Node Type to See JSON
+                Mapping)</span
+              >
+              <span class="yang-rfc">RFC 7950 / RFC 8040</span>
+            </div>
+            <div class="yang-pills" id="yangPills"></div>
+            <div class="yang-detail" id="yangDetail"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
