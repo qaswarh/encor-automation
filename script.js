@@ -246,20 +246,6 @@ document.addEventListener('DOMContentLoaded', function () {
   var panelRestconf = document.getElementById('panelRestconf');
   var panelNetconf = document.getElementById('panelNetconf');
 
-  tabRestconf.addEventListener('click', function () {
-    tabRestconf.classList.add('active');
-    tabNetconf.classList.remove('active');
-    panelRestconf.classList.remove('hidden');
-    panelNetconf.classList.add('hidden');
-  });
-
-  tabNetconf.addEventListener('click', function () {
-    tabNetconf.classList.add('active');
-    tabRestconf.classList.remove('active');
-    panelNetconf.classList.remove('hidden');
-    panelRestconf.classList.add('hidden');
-  });
-
   var netconfRpcs = {
     'get-config': {
       explain: 'Retrieves ONLY configuration data from a specified datastore (<running>, <candidate>, or <startup>).',
