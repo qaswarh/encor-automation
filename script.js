@@ -240,6 +240,69 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   scenarioSelect.addEventListener('change', renderRestconf);
+  // --- 2B. Top Protocol Tab Switcher & NETCONF XML RPC Simulator ---
+  var tabRestconf = document.getElementById('tabRestconf');
+  var tabNetconf = document.getElementById('tabNetconf');
+  var panelRestconf = document.getElementById('panelRestconf');
+  var panelNetconf = document.getElementById('panelNetconf');
+
+  tabRestconf.addEventListener('click', function () {
+    tabRestconf.classList.add('active');
+    tabNetconf.classList.remove('active');
+    panelRestconf.classList.remove('hidden');
+    panelNetconf.classList.add('hidden');
+  });
+
+  tabNetconf.addEventListener('click', function () {
+    tabNetconf.classList.add('active');
+    tabRestconf.classList.remove('active');
+    panelNetconf.classList.remove('hidden');
+    panelRestconf.classList.add('hidden');
+  });
+
+  var netconfRpcs = {
+    'get-config': {
+      explain: 'Retrieves ONLY configuration data from a specified datastore (<running>, <candidate>, or <startup>).',
+      dsNote: 'Target Datastore: <running> | Returns XML wrapped in <rpc-reply><data>...',
+      req: '<rpc message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <get-config>\n    <source><running/></source>\n    <filter type="subtree">\n      <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>\n    </filter>\n  </get-config>\n</rpc>]]>]]>',
+      res: '<rpc-reply message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <data>\n    <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">\n      <interface><name>Loopback10</name><enabled>true</enabled></interface>\n    </interfaces>\n  </data>\n</rpc-reply>]]>]]>'
+    },
+    'get': {
+      explain: 'Retrieves BOTH configuration data AND read-only operational state (counters, link up/down) from <running>.',
+      dsNote: 'Note: Unlike <get-config>, <get> takes no <source> tag because it always queries live operational state.',
+      req: '<rpc message-id="102" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <get>\n    <filter type="subtree">\n      <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>\n    </filter>\n  </get>\n</rpc>]]>]]>',
+      res: '<rpc-reply message-id="102" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <data>\n    <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">\n      <interface><name>GigabitEthernet1</name><oper-status>up</oper-status></interface>\n    </interfaces-state>\n  </data>\n</rpc-reply>]]>]]>'
+    },
+    'edit-config': {
+      explain: 'Creates, merges, replaces, or deletes configuration nodes inside <candidate> (or directly in <running>).',
+      dsNote: 'Target Datastore: <candidate> | Staged safely until <commit> is sent (key advantage over RESTCONF).',
+      req: '<rpc message-id="103" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <edit-config>\n    <target><candidate/></target>\n    <config>\n      <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">\n        <interface nc:operation="merge">\n          <name>Loopback10</name>\n          <description>ENCOR-NETCONF-LAB</description>\n        </interface>\n      </interfaces>\n    </config>\n  </edit-config>\n</rpc>]]>]]>',
+      res: '<rpc-reply message-id="103" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <ok/>\n</rpc-reply>]]>]]>'
+    },
+    'commit': {
+      explain: 'Atomically copies all staged changes from the <candidate> datastore into the active <running> configuration.',
+      dsNote: 'Supports confirmed-commit (<confirmed/>) for automatic rollback if SSH connectivity is lost.',
+      req: '<rpc message-id="104" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <commit/>\n</rpc>]]>]]>',
+      res: '<rpc-reply message-id="104" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <ok/>\n</rpc-reply>]]>]]>'
+    },
+    'discard': {
+      explain: 'Cancels all uncommitted edits in the <candidate> datastore, reverting it back to match <running>.',
+      dsNote: 'Useful for aborting failed multi-device transactions cleanly.',
+      req: '<rpc message-id="105" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <discard-changes/>\n</rpc>]]>]]>',
+      res: '<rpc-reply message-id="105" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">\n  <ok/>\n</rpc-reply>]]>]]>'
+    }
+  };
+
+  var ncSelect = document.getElementById('ncRpcSelect');
+  function renderNetconf() {
+    var item = netconfRpcs[ncSelect.value];
+    document.getElementById('ncExplain').textContent = item.explain;
+    document.getElementById('ncDatastoreNote').textContent = item.dsNote;
+    document.getElementById('ncReqXml').textContent = item.req;
+    document.getElementById('ncResXml').textContent = item.res;
+  }
+  ncSelect.addEventListener('change', renderNetconf);
+  renderNetconf();
 
   // --- 3. Interactive YANG Node Inspector ---
   var yangNodes = [

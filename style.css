@@ -93,6 +93,31 @@ body {
   background: #ffffff;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06);
 }
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 12px;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #374151;
+  cursor: pointer;
+}
+
+.mode-tab.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
 
 .sim-header {
   display: flex;

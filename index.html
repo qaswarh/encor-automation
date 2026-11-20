@@ -130,33 +130,111 @@
           </div>
         </div>
       </aside>
-      <!-- Right Column: Interactive RESTCONF & YANG Explorer -->
-      <main class="visualizer-column">
-        <div class="net-widget">
-          <div class="sim-header">
-            <div>
-              <h1>RESTCONF API &amp; YANG Data Model Simulator</h1>
-              <p class="sim-sub">
-                Select an API workflow and HTTP verb to inspect live RESTCONF
-                URIs, YANG paths, JSON payloads, and status codes.
-              </p>
-            </div>
-            <select id="apiScenario" class="scenario-select">
-              <option value="int-ip">
-                1. IOS-XE: Configure Loopback10 IPv4 (ietf-interfaces)
-              </option>
-              <option value="int-oper">
-                2. IOS-XE: Read Interface Operational State
-                (ietf-interfaces-state)
-              </option>
-              <option value="bgp-asn">
-                3. IOS-XE Native: Update BGP Router ID (Cisco-IOS-XE-native)
-              </option>
-              <option value="cat-health">
-                4. Cisco Catalyst Center: Query Client Health Assurance
-              </option>
-            </select>
+  <!-- Right Column: Interactive RESTCONF & NETCONF Explorer -->
+  <main class="visualizer-column">
+    <div class="net-widget">
+      <!-- Top Protocol Mode Tabs -->
+      <div class="mode-tabs">
+        <button type="button" class="mode-tab active" id="tabRestconf">RESTCONF (JSON / HTTPS 443)</button>
+        <button type="button" class="mode-tab" id="tabNetconf">NETCONF (XML / SSH 830)</button>
+      </div>
+
+      <!-- TAB 1: RESTCONF SIMULATOR -->
+      <div id="panelRestconf">
+        <div class="sim-header">
+          <div>
+            <h1>RESTCONF API &amp; YANG Data Model Simulator</h1>
+            <p class="sim-sub">Select an API workflow and HTTP verb to inspect live RESTCONF URIs, YANG paths, JSON payloads, and status codes.</p>
           </div>
+          <select id="apiScenario" class="scenario-select">
+            <option value="int-ip">1. IOS-XE: Configure Loopback10 IPv4 (ietf-interfaces)</option>
+            <option value="int-oper">2. IOS-XE: Read Interface Operational State (ietf-interfaces-state)</option>
+            <option value="bgp-asn">3. IOS-XE Native: Update BGP Router ID (Cisco-IOS-XE-native)</option>
+            <option value="cat-health">4. Cisco Catalyst Center: Query Client Health Assurance</option>
+          </select>
+        </div>
+
+        <div class="verb-bar" id="verbBar">
+          <button type="button" class="verb-btn verb-get" data-verb="GET">GET</button>
+          <button type="button" class="verb-btn verb-post" data-verb="POST">POST</button>
+          <button type="button" class="verb-btn verb-put" data-verb="PUT">PUT</button>
+          <button type="button" class="verb-btn verb-patch active" data-verb="PATCH">PATCH</button>
+          <button type="button" class="verb-btn verb-delete" data-verb="DELETE">DELETE</button>
+        </div>
+
+        <div class="api-grid">
+          <div class="api-card">
+            <div class="api-card-head">
+              <span>HTTP Request (Client → Device / Controller)</span>
+              <span class="mime-tag">Accept: application/yang-data+json</span>
+            </div>
+            <div class="uri-box" id="reqUri"></div>
+            <div class="sub-label">Request JSON Body:</div>
+            <pre class="code-pre" id="reqBody"></pre>
+          </div>
+
+          <div class="api-card">
+            <div class="api-card-head">
+              <span>HTTP Response</span>
+              <span class="status-badge" id="resStatus">204 No Content</span>
+            </div>
+            <div class="explain-box" id="resExplain"></div>
+            <div class="sub-label">Response JSON Body:</div>
+            <pre class="code-pre" id="resBody"></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: NETCONF SIMULATOR -->
+      <div id="panelNetconf" class="hidden">
+        <div class="sim-header">
+          <div>
+            <h1>NETCONF RPC &amp; Datastore Simulator (RFC 6241)</h1>
+            <p class="sim-sub">Select a NETCONF XML RPC operation to see how SSH port 830 manages <code>&lt;running&gt;</code> and <code>&lt;candidate&gt;</code> datastores.</p>
+          </div>
+          <select id="ncRpcSelect" class="scenario-select">
+            <option value="get-config">&lt;get-config&gt; (Read Running Config)</option>
+            <option value="get">&lt;get&gt; (Read Config + Operational State)</option>
+            <option value="edit-config" selected>&lt;edit-config&gt; (Modify Candidate Datastore)</option>
+            <option value="commit">&lt;commit&gt; (Push Candidate → Running)</option>
+            <option value="discard">&lt;discard-changes&gt; (Rollback Candidate)</option>
+          </select>
+        </div>
+
+        <div class="api-grid">
+          <div class="api-card">
+            <div class="api-card-head">
+              <span>NETCONF &lt;rpc&gt; Request (SSH TCP 830)</span>
+              <span class="mime-tag">Framing: ]]>]]></span>
+            </div>
+            <div class="explain-box" id="ncExplain"></div>
+            <div class="sub-label">XML RPC Payload:</div>
+            <pre class="code-pre" id="ncReqXml"></pre>
+          </div>
+
+          <div class="api-card">
+            <div class="api-card-head">
+              <span>NETCONF &lt;rpc-reply&gt; Response</span>
+              <span class="status-badge" id="ncStatus">&lt;ok/&gt;</span>
+            </div>
+            <div class="explain-box" id="ncDatastoreNote"></div>
+            <div class="sub-label">XML RPC Reply:</div>
+            <pre class="code-pre" id="ncResXml"></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shared YANG Model Node Inspector -->
+      <div class="yang-section">
+        <div class="yang-head">
+          <span>YANG Model Node Inspector (Click a Node Type to See JSON Mapping)</span>
+          <span class="yang-rfc">RFC 7950 / RFC 8040</span>
+        </div>
+        <div class="yang-pills" id="yangPills"></div>
+        <div class="yang-detail" id="yangDetail"></div>
+      </div>
+    </div>
+  </main>
 
           <!-- HTTP Verb Selector Bar -->
           <div class="verb-bar" id="verbBar">
