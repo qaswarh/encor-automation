@@ -304,6 +304,66 @@ document.addEventListener('DOMContentLoaded', function () {
   ncSelect.addEventListener('change', renderNetconf);
   renderNetconf();
 
+  // --- 2C. gRPC Telemetry & SOAP Simulator ---
+  var tabGrpcSoap = document.getElementById('tabGrpcSoap');
+  var panelGrpcSoap = document.getElementById('panelGrpcSoap');
+
+  function activateProtocolTab(activeTab, activePanel) {
+    [tabRestconf, tabNetconf, tabGrpcSoap].forEach(function (t) { t.classList.remove('active'); });
+    [panelRestconf, panelNetconf, panelGrpcSoap].forEach(function (p) { p.classList.add('hidden'); });
+    activeTab.classList.add('active');
+    activePanel.classList.remove('hidden');
+  }
+
+  tabRestconf.addEventListener('click', function () { activateProtocolTab(tabRestconf, panelRestconf); });
+  tabNetconf.addEventListener('click', function () { activateProtocolTab(tabNetconf, panelNetconf); });
+  tabGrpcSoap.addEventListener('click', function () { activateProtocolTab(tabGrpcSoap, panelGrpcSoap); });
+
+  var gsScenarios = {
+    'grpc-dialout': {
+      reqTitle: 'IOS-XE Model-Driven Telemetry Config (Dial-Out)',
+      transport: 'gRPC / HTTP/2 | TCP 57400',
+      encoding: 'GPB / KV-GPB (Binary)',
+      explain: 'Router initiates an outbound HTTP/2 gRPC session to a collector and pushes YANG operational telemetry every 5 seconds—eliminating slow SNMP polling.',
+      note: 'Binary Protocol Buffers (Protobuf) compress payloads up to 5–10x smaller than XML/JSON for high-frequency streaming.',
+      req: 'telemetry ietf subscription 101\n encoding encode-kvgpb\n filter xpath /interfaces-ios-xe-oper:interfaces/interface/statistics\n stream yang-push\n update-policy periodic 500\n receiver ip address 10.10.99.50 57400 protocol grpc-tcp',
+      res: '// Decoded Protobuf Telemetry Frame (Streamed every 5.0s)\n{\n  "node_id_str": "Core-RTR1",\n  "encoding_path": "Cisco-IOS-XE-interfaces-oper:interfaces/interface/statistics",\n  "data_gpbkv": {\n    "name": "GigabitEthernet1",\n    "rx_kbps": 482100,\n    "tx_kbps": 391450,\n    "in_discards": 0\n  }\n}'
+    },
+    'gnmi-sub': {
+      reqTitle: 'gNMI SubscribeRequest (OpenConfig YANG)',
+      transport: 'gNMI over gRPC | HTTP/2',
+      encoding: 'Protobuf (Binary)',
+      explain: 'gNMI (gRPC Network Management Interface) combines configuration and streaming telemetry into a single unified gRPC service using OpenConfig YANG models.',
+      note: 'Supports STREAM (periodic/on-change), ONCE, and POLL subscription modes over a single persistent HTTP/2 connection.',
+      req: 'service gNMI {\n  rpc Subscribe(stream SubscribeRequest) returns (stream SubscribeResponse);\n}\n\n// SubscribeRequest (Protobuf definition):\nsubscribe {\n  prefix { origin: "openconfig" }\n  subscription { path: "interfaces/interface[name=Eth1/1]/state/counters" mode: SAMPLE sample_interval: 1000000000 }\n}',
+      res: '// SubscribeResponse (On-Change / Sampled Update)\nupdate {\n  timestamp: 1795056300000000000\n  update {\n    path { elem { name: "in-octets" } }\n    val { uint_val: 9841205440 }\n  }\n}'
+    },
+    'soap-axl': {
+      reqTitle: 'SOAP HTTP POST Request (Strict XML Envelope)',
+      transport: 'HTTPS | TCP 443 (WSDL)',
+      encoding: 'XML (<soap:Envelope>)',
+      explain: 'SOAP (Simple Object Access Protocol) wraps every RPC call in a strict XML <Envelope>, <Header>, and <Body> validated against a WSDL contract.',
+      note: 'Heavier and more verbose than REST/JSON; seen in legacy enterprise systems (such as Cisco CUCM AXL APIs).',
+      req: 'POST /axl/ HTTP/1.1\nSOAPAction: "CUCM:DB ver=14.0 getUser"\nContent-Type: text/xml; charset=utf-8\n\n<soapenv:Envelope xmlns:soapenv="http://xmlsoap.org">\n  <soapenv:Header/>\n  <soapenv:Body>\n    <ns:getUser xmlns:ns="http://cisco.com">\n      <userid>qhussain</userid>\n    </ns:getUser>\n  </soapenv:Body>\n</soapenv:Envelope>',
+      res: '<soapenv:Envelope xmlns:soapenv="http://xmlsoap.org">\n  <soapenv:Body>\n    <ns:getUserResponse xmlns:ns="http://cisco.com">\n      <return>\n        <user><userid>qhussain</userid><department>Network-Eng</department></user>\n      </return>\n    </ns:getUserResponse>\n  </soapenv:Body>\n</soapenv:Envelope>'
+    }
+  };
+
+  var gsSelect = document.getElementById('gsSelect');
+  function renderGrpcSoap() {
+    var item = gsScenarios[gsSelect.value];
+    document.getElementById('gsReqTitle').textContent = item.reqTitle;
+    document.getElementById('gsTransport').textContent = item.transport;
+    document.getElementById('gsEncoding').textContent = item.encoding;
+    document.getElementById('gsExplain').textContent = item.explain;
+    document.getElementById('gsNote').textContent = item.note;
+    document.getElementById('gsReqCode').textContent = item.req;
+    document.getElementById('gsResCode').textContent = item.res;
+  }
+  gsSelect.addEventListener('change', renderGrpcSoap);
+  renderGrpcSoap();
+
+
   // --- 3. Interactive YANG Node Inspector ---
   var yangNodes = [
     {
